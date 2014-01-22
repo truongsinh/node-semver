@@ -879,8 +879,16 @@ function hyphenReplace($0,
 
 
 // if ANY of the sets match ALL of its comparators, then pass
-Range.prototype.test = function(version) {
+/**
+ *
+ * @param {String} version
+ * @param {Boolean} stableOnly
+ * @returns {Boolean}
+ */
+Range.prototype.test = function(version, stableOnly) {
   if (!version)
+    return false;
+  if(stableOnly && version.indexOf('-')> -1)
     return false;
   for (var i = 0; i < this.set.length; i++) {
     if (testSet(this.set[i], version))
@@ -898,19 +906,35 @@ function testSet(set, version) {
 }
 
 exports.satisfies = satisfies;
-function satisfies(version, range, loose) {
+/**
+ *
+ * @param {String} versions
+ * @param {String} range
+ * @param {Boolean} loose
+ * @param {Boolean} stableOnly
+ * @returns {String|null}
+ */
+function satisfies(version, range, loose, stableOnly) {
   try {
     range = new Range(range, loose);
   } catch (er) {
     return false;
   }
-  return range.test(version);
+  return range.test(version, stableOnly);
 }
 
 exports.maxSatisfying = maxSatisfying;
-function maxSatisfying(versions, range, loose) {
+/**
+ *
+ * @param {Array[String]} versions
+ * @param {String} range
+ * @param {Boolean} loose
+ * @param {Boolean} stableOnly
+ * @returns {String|null}
+ */
+function maxSatisfying(versions, range, loose, stableOnly) {
   return versions.filter(function(version) {
-    return satisfies(version, range, loose);
+    return satisfies(version, range, loose, stableOnly);
   }).sort(function(a, b) {
     return rcompare(a, b, loose);
   })[0] || null;
